@@ -1,10 +1,71 @@
 // ---- Define your dialogs  and panels here ----
+// Define effective permissions panel
+// Q4
+let effective_permissions_panel = define_new_effective_permissions(
+    'effective_permissions_panel',
+    true
+);
+$('#sidepanel').append(effective_permissions_panel);
 
+// Q7 and Q8
+let user_selector = define_new_user_select_field(
+    'user_select',
+    'Select the user',
+    function(selected_user) {
+        $('#effective_permissions_panel').attr('username', selected_user);
+    }
+);
+$('#sidepanel').append(user_selector);
+
+// Q9
+let new_dialog = define_new_dialog('info_dialog', 'Information/Details');
+// $('.perm_info').click(
+//     function() {
+//         console.log('Clicked!');
+//         new_dialog.dialog('Open');
+//     }
+// );
+
+// Q10
+// $('.perm_info').click(
+//     function() {
+//         let name = $('#effective-permissions-panel').attr('username');
+//         let path = $('#effective-permissions-panel').attr('filepath');
+//         let permission = $(this).attr('permission_name');
+//         console.log('Username:', name, 'Filepath:', path, 'Permission Type:', permission);
+//     }
+// );
+
+// Q11
+$('.perm_info').click(
+    function() {
+        let name = $('#effective-permissions-panel').attr('username');
+        let path = $('#effective-permissions-panel').attr('filepath');
+        let permission = $(this).attr('permission_name');
+        console.log('Username:', name, 'Filepath:', path, 'Permission Type:', permission);
+
+        if (!name || !path) {
+            new_dialog.html('Select a user and file first.').dialog('Open');
+            return;
+        }
+  
+        let file_obj = path_to_file[path];
+        let user_obj = all_users[name];
+        console.log('File Object:', file_obj, 'User Object:', user_obj);
+  
+        let explanation_obj = allow_user_action(file_obj, user_obj, permission, true);
+        console.log('Explanation Object:', explanation_obj);
+  
+        let text = get_explanation_text(explanation_obj);
+        console.log('Explanation Text:', text);
+
+        new_dialog.html(text).dialog('Open');
+    }
+);
 
 
 // ---- Display file structure ----
-
-// (recursively) makes and returns an html element (wrapped in a jquery object) for a given file object
+// (Recursively) makes and returns an html element (wrapped in a jquery object) for a given file object
 function make_file_element(file_obj) {
     let file_hash = get_full_path(file_obj)
 
@@ -18,7 +79,7 @@ function make_file_element(file_obj) {
             </h3>
         </div>`)
 
-        // append children, if any:
+        // Append children, if any:
         if( file_hash in parent_to_children) {
             let container_elem = $("<div class='folder_contents'></div>")
             folder_elem.append(container_elem)
@@ -41,12 +102,10 @@ function make_file_element(file_obj) {
 
 for(let root_file of root_files) {
     let file_elem = make_file_element(root_file)
-    $( "#filestructure" ).append( file_elem);    
+    $( "#filestructure" ).append( file_elem);
 }
 
-
-
-// make folder hierarchy into an accordion structure
+// Make folder hierarchy into an accordion structure
 $('.folder').accordion({
     collapsible: true,
     heightStyle: 'content'
@@ -55,7 +114,7 @@ $('.folder').accordion({
 
 // -- Connect File Structure lock buttons to the permission dialog --
 
-// open permissions dialog when a permission button is clicked
+// Open permissions dialog when a permission button is clicked
 $('.permbutton').click( function( e ) {
     // Set the path and open dialog:
     let path = e.currentTarget.getAttribute('path');
